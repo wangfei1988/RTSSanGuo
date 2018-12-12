@@ -19,16 +19,30 @@ namespace RTSSanGuo
 #if TestTT
         public DTroop data;
 #endif
-        #region wrapdata
+        #region  basic warp data  
         //基础属性的warp
         public override int ID
         {
             get { return data.id; }
         }
+        public virtual int TypeID
+        {
+            get { return data.id_trooptype; }
+        }
+        public virtual int ResID
+        {
+            get { return TypeData.resid; }
+        }
+
         public override string Alias
         {
             get { return data.alias; }
         }
+
+        public string TroopName {
+            get { return Alias; }
+        }
+
         public override string ShortDesc
         {
             get { return data.shortdesc; }
@@ -38,7 +52,7 @@ namespace RTSSanGuo
             get { return data.fulldesc; }
         }
 
-        public virtual int CurHP
+        public override int CurHP
         {
             get
             {                 
@@ -56,7 +70,7 @@ namespace RTSSanGuo
             }
         }
               
-        public virtual int MaxHp  //血条显示这个为max 
+        public override int MaxHP  //血条显示这个为max 
         {
             get
             {                
@@ -79,9 +93,7 @@ namespace RTSSanGuo
             }
         }
 
-
-
-
+        
         public virtual int Def
         {
             get
@@ -90,7 +102,17 @@ namespace RTSSanGuo
             }
         }
 
- 
+        public virtual int MoveSpeed
+        {
+            get
+            {
+                return TypeData.basemovespeed;
+            }
+        }
+
+          
+
+
         public override bool CanBeAttack
         {
             get
@@ -149,7 +171,7 @@ namespace RTSSanGuo
 
         public void Init()
         {
-            agent.speed = moveSpeed;
+            agent.speed = MoveSpeed;
              
         }
 
@@ -255,13 +277,13 @@ namespace RTSSanGuo
         public Transform  remoteBulletStartPoint;
         public GameObject remoteBulletObj;
         public  void NearAttackTroop(Troop tarTroop) {
-            float damage = this.atk * (this.atk / tarTroop.def);  //this.atk / troop.def 伤害吸收率
-            tarTroop.hp = tarTroop.hp -(int) damage;
+            float damage = this.Atk * (this.Atk / tarTroop.Def);  //this.atk / troop.def 伤害吸收率
+            tarTroop.CurHP = tarTroop.CurHP -(int) damage;
             //tarTroop.NearAttackTroop(this); 没有反击，不然就是一对多
         }
         public void NearAttackBuilding(Building tarBuilding)
         {
-            float damage = this.atk * (this.atk / tarBuilding.Def);  //this.atk / troop.def 伤害吸收率
+            float damage = this.Atk * (this.Atk / tarBuilding.Def);  //this.atk / troop.def 伤害吸收率
             tarBuilding.CurHP = tarBuilding.CurHP - (int)damage;
             tarBuilding.DefAttackTroop(this);//反击
         }
@@ -272,10 +294,7 @@ namespace RTSSanGuo
             List<Building> canRemoteAttackBuildingList = new List<Building>();
             foreach (KeyValuePair<int, CityBuilding> pair in EntityMgr.Instacne.dic_City)
             {
-                if (Vector3.Distance(pair.Value.transform.position, transform.position) <= attackRange)
-                {
-
-                }
+                 
 
             }
 

@@ -1,10 +1,13 @@
-﻿using System;
+﻿#define Test
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using System.Collections;
 namespace RTSSanGuo
 {
+    public enum EResType {Troop=1,Pbuilding,Wbuilding}
     public class ResMgr :MonoBehaviour
     {
         public static ResMgr Instacne;
@@ -15,21 +18,39 @@ namespace RTSSanGuo
             else
                 Debug.LogError("more than one instance");
         }
+        
+        public Dictionary<int, GameObject> dic_TroopPrefab = new Dictionary<int, GameObject>();
 
         public GameObject[] troopPrefabArray;
-        public Dictionary<int, GameObject> dic_TroopPrefab = new Dictionary<int, GameObject>();
-        //加载这个dic_TroopPrefab的时候可以使用dataManager数据初始化
-        //
-        //public Dictionary<int, GameObject> dic_CityPrefab = new Dictionary<int, GameObject>();
-
         private void Start()
         {
             foreach (GameObject go in troopPrefabArray) {
-               int prefabid = go.transform.GetComponent<Troop>().prefabid;
+               int prefabid = go.transform.GetComponent<Troop>().ResID;
                 dic_TroopPrefab.Add(prefabid, go);
             }
+            StartCoroutine(LoadResData());
         }
 
+        public bool hasInitAllData = false;
+        private CSVFile csvfile=null;
+        private IEnumerator LoadResData() {
+            string filePath = PathTool.DataFileRootFold + "/common/Res.csv";
+            csvfile = new CSVFile();
+            csvfile.ReadCsv(filePath);
+            foreach (string[] arr in csvfile.valueLines) {
+                if (arr.Length != 7) continue;
+                int id = int.Parse(arr[0]);
+                string alias =arr[1];
+                EResType type = (EResType) int.Parse(arr[2]);
+                bool inInspector = bool.Parse(arr[3]);
+                string respath=arr[4];  // Resouce.load 时路径
+                string bundlepath=arr[5];
+                string inbundlepath=arr[6];
+                if (inInspector) continue;//已经在Inspector,不需要加载
+            }
+            hasInitAllData = true;
+            yield return null;
+        }
 
     }
 }

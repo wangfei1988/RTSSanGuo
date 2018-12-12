@@ -39,6 +39,39 @@ namespace RTSSanGuo
         }
 
 
+
+        public virtual int CurHP
+        {
+            get
+            {
+                Debug.LogError("Must override in child ");
+                return 0;
+            }
+            set
+            {
+                Debug.LogError("Must override in child ");
+            }
+        }
+
+        public virtual int MaxHP //血条显示这个为max 
+        {
+            get
+            {
+                Debug.LogError("Must override in child ");
+                return 0;
+            }
+        }
+
+    
+        public virtual int Atk
+        {
+            get { Debug.LogError("Must override in child "); return 100; }
+        }
+        public virtual int Def
+        {
+            get { Debug.LogError("Must override in child ");  return 100; }
+        }
+
         public float hudXOffset;
         public float hudYOffset;
 

@@ -28,14 +28,14 @@ namespace RTSSanGuo
             xOffset = troop.hudXOffset;
             yOffset = troop.hudYOffset;
             this.troop = troop;
-            hpslider.value = troop.hp / (troop.maxhp * 1.0f);
-            textname.text = troop.entityname;
+            hpslider.value = troop.CurHP / (troop.MaxHp * 1.0f);
+            textname.text = troop.TroopName;
         }
 
         public void onTroopInfoChange() {
             if (troop) {
-                hpslider.value = troop.hp / (troop.maxhp * 1.0f);
-                textname.text = troop.entityname;
+                hpslider.value = troop.CurHP / (troop.MaxHp * 1.0f);
+                textname.text = troop.TroopName;
             }
         }
 
@@ -54,8 +54,8 @@ namespace RTSSanGuo
                 {
                     recTransform.gameObject.SetActive(true);
                 }
-                hpslider.value = troop.hp / (troop.maxhp * 1.0f);
-                textname.text = troop.entityname;
+                hpslider.value = troop.CurHP / (troop.MaxHp * 1.0f);
+                textname.text = troop.TroopName;
             }
             else {
                 recTransform.gameObject.SetActive(false);

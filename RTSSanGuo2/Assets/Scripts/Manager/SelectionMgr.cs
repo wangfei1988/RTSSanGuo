@@ -117,7 +117,7 @@ namespace RTSSanGuo
         private void SelectTroop(Troop troop)
         {
             if (!troop.CanBeSelect) return;
-            Debug.Log("select troop" + troop.entityname);
+            Debug.Log("select troop" + troop.TroopName);
             List<Troop> list = new List<Troop>();
             list.Add(troop);
             SelectTroopList(list);

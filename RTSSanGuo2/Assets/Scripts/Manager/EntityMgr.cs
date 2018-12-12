@@ -106,9 +106,36 @@ namespace RTSSanGuo
             return troop; //这里只负责返回，父子关系由调用者处理            
         }
 
-        public Troop AddTroopFromData(int dataid, Vector3 pos)
+        public Troop AddTroopFromData(int troopid, Vector3 pos)
         {
             return null;    
+        }
+
+        //City 不能new ，所以只能初始化数据.而且不能摧毁
+        public void  InitAllCityData() {            
+            CityBuilding[] cities = cityEntityParent.GetComponentsInChildren<CityBuilding>();
+            foreach (CityBuilding city in cities) {
+                if (DataMgr.Instacne.dic_City.ContainsKey(city.initid))
+                    city.data = DataMgr.Instacne.dic_City[city.initid];
+                else
+                {
+                    LogTool.LogError("DataMgr not have id " + city.initid);
+                }
+            }
+        }
+
+        public Section AddSectionFromData(int sectionid) {
+            if (DataMgr.Instacne.dic_Section.ContainsKey(sectionid))
+            {
+                LogTool.LogError("DataMgr not have id " + sectionid);
+                return null;
+            }
+            DSection dsection = DataMgr.Instacne.dic_Section[sectionid];
+            GameObject go = new GameObject();
+            go.transform.SetParent(sectionEntityParent);
+            Section section = go.AddComponent<Section>();
+            section.data = dsection;
+            return section;
         }
 
 

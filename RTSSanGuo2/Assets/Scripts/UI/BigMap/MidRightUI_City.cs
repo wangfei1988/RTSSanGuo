@@ -21,7 +21,7 @@ public class MidRightUI_City : MonoBehaviour {
 
         public void BuildTroop() {
             if (city)
-                city.BuildTroop(city.id); //这里先简单起见 prefab 类型就是cityid 类型
+                city.BuildTroop(city.ID); //这里先简单起见 prefab 类型就是cityid 类型
         }
     
 }

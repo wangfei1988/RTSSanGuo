@@ -32,22 +32,7 @@ namespace RTSSanGuo
         //public int atk;
         //public int def;
 
-        public virtual int CurHP {
-            get { return 1000; }
-            set { }
-        }
-        public virtual int MaxHP
-        {
-            get { return 1000; }
-        }
-        public virtual int Atk
-        {
-            get { return 100; }
-        }
-        public virtual int Def
-        {
-            get { return 100; }
-        }
+        
 
 
         public Action onHpChange;

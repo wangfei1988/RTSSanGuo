@@ -10,6 +10,8 @@ namespace RTSSanGuo
     public  class CityBuilding:Building
     {
 #if Testttt
+        public int initid;//city 一开始就是在场景，和Data绑定必须和
+
         [SerializeField]
         public DCityBuilding data;
 
@@ -229,8 +231,8 @@ namespace RTSSanGuo
 
         public override void DefAttackTroop(Troop troop) //反击
         {
-            float damage = this.Atk * (this.Atk / troop.def);  //this.atk / troop.def 伤害吸收率
-            troop.hp = troop.hp - (int)damage;
+            float damage = this.Atk * (this.Atk / troop.Def);  //this.atk / troop.def 伤害吸收率
+            troop.CurHP = troop.CurHP - (int)damage;
         }
     }
 }

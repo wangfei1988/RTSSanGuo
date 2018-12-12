@@ -8,6 +8,8 @@ namespace RTSSanGuo
     //所有功能指令都在这Entity ，如果写到其他Component 也要这里Wrap 一下
     public  class Section:EntityBase
     {
+        public DSection data;
+
         public Person leaderPerson;
         //public Color sectionColor;
         public bool isPlayerControl;

@@ -12,9 +12,11 @@ namespace RTSSanGuo
         public int money;
         public int population;
         public int curhp;
-        public int curtotalsoldiernum;// 当前所有soldier 数量
-        
+        public int curtotalsoldiernum;// 当前所有soldier 数量    
+        public int mingxin;
+        public int zhian;
         public int id_leadperson;
+        
         public List<int> idlist_pbuilding = new List<int>(); //只保存一级子类
         public List<int> idlist_troop = new List<int>();
         public List<int> idlist_person = new List<int>();

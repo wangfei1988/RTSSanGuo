@@ -28,14 +28,14 @@ namespace RTSSanGuo
             xOffset = city.hudXOffset;
             yOffset = city.hudYOffset;
             this.city = city;
-            hpslider.value = city.hp / (city.maxhp * 1.0f);
-            textname.text = city.entityname;            
+            hpslider.value = city.CurHP / (city.MaxHP * 1.0f);
+            textname.text = city.Alias;            
         }
 
         public void onCityInfoChange() {
             if (city) {
-                hpslider.value = city.hp / (city.maxhp * 1.0f);
-                textname.text = city.entityname;
+                hpslider.value = city.CurHP / (city.MaxHP * 1.0f);
+                textname.text = city.Alias;
             }           
         }
 
@@ -55,8 +55,8 @@ namespace RTSSanGuo
                 {
                     recTransform.gameObject.SetActive(true);
                 }
-                hpslider.value = city.hp / (city.maxhp * 1.0f);
-                textname.text = city.entityname;
+                hpslider.value = city.CurHP / (city.MaxHP * 1.0f);
+                textname.text = city.Alias;
             }
             else {
                 recTransform.gameObject.SetActive(false);

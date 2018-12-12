@@ -12,8 +12,7 @@ namespace RTSSanGuo
         public int baseatk;
         public int basedef;
         public int baseremoteatkrange;
-        public int basemovespeed;      
-       //public int parentid_city; //  //不可以被new ，也就不需要父子关系了。 直接全局索引
-
+        public int basemovespeed;
+        public int resid;
     }
 }
