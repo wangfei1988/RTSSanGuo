@@ -1,7 +1,8 @@
-#ignore all file
-*
+#ignore all file  几乎所有文件都有后缀名，这个排除了文件夹
+*.*  
+*Library/metadata/*
 #keep fold 3rd
-!/3rd/ 
+!/3rddll/*.*
 
 !*.csproj
 !*.unityproj
@@ -10,6 +11,7 @@
 !*.user
 !*.userprefs
 
+!*.cs
 !*.txt
 !*.json
 !*.csv
@@ -22,3 +24,4 @@
 !*.MD
 !*.md
 !*.zip
+!.gitignore
