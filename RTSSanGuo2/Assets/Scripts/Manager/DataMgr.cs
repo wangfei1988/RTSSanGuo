@@ -38,7 +38,7 @@ namespace RTSSanGuo
         private CSVFile factionFile = null;
         public Dictionary<int, DFaction> dic_Faction = new Dictionary<int, DFaction>();
 
-        public bool hasInitAllData = false;
+        public bool hasInitAllData = false;// 初始化基础数据
         public IEnumerator LoadEsscentialData() {
 
             //首先加载不可变更数据
@@ -57,7 +57,7 @@ namespace RTSSanGuo
                 troopType.baseatk = int.Parse(arr[4]);
                 troopType.basedef = int.Parse(arr[5]);
                 troopType.baseremoteatkrange = int.Parse(arr[6]);
-                troopType.basemovespeed = int.Parse(arr[7]);
+                troopType.basemovespeed = float.Parse(arr[7]);
                 troopType.resid = int.Parse(arr[8]);
                 dic_TroopType.Add(troopType.id, troopType);
             }
@@ -110,11 +110,14 @@ namespace RTSSanGuo
         }
 
         public int loadPercent = 0;
+        public bool dataPrepared = false;
+        public DSaveData selSaveData = null;
         public bool LoadSaveData(int id) {
+            dataPrepared = false;
             if (dic_Save.ContainsKey(id))
             {
-                DSaveData data = dic_Save[id];
-                string fold = PathTool.DataFileRootFold+"/save/"+ data.subfold;
+                selSaveData = dic_Save[id];
+                string fold = PathTool.DataFileRootFold+"/save/"+ selSaveData.subfold;
                 StartCoroutine(LoadSaveData(fold));
                 return true;
             }
@@ -124,6 +127,9 @@ namespace RTSSanGuo
                 return false;
             }           
         }
+
+        //Data 直接保存的是一级子对象id  以及反向推算出父对象id 
+        // 子对象的子对象 以及父对象的父对象没有记录，只能通过间接获取
         private IEnumerator LoadSaveData(string fold) {
             LoadTroop(fold);
             loadPercent = 5;
@@ -136,8 +142,10 @@ namespace RTSSanGuo
             yield return null;
             LoadFaction(fold);
             loadPercent = 20;
-            yield return null;            
+            yield return null;
+            loadPercent = 100;
 
+            dataPrepared = true;
             yield return null;
         }
 
@@ -182,9 +190,9 @@ namespace RTSSanGuo
                 }
                 city.idlist_person = CommonUtil.StringToListInt(arr[14], '#');
                 city.idlist_freeperson = CommonUtil.StringToListInt(arr[15], '#');
-                dic_City.Add(city.id, city);
-                EntityMgr.Instacne.AddTroopFromData
+                dic_City.Add(city.id, city);               
             }
+            EntityMgr.Instacne.InitAllCityData();
         }
 
         private void LoadSection(string fold) {
@@ -198,22 +206,26 @@ namespace RTSSanGuo
                     LogTool.LogError("section arr.length" + arr.Length);
                     continue;
                 } 
-                DSection section = new DSection();
-                section.id = int.Parse(arr[0]);
-                section.alias = arr[1];
-                section.shortdesc = arr[2];
-                section.fulldesc = arr[3];
-                section.id_leadperson = int.Parse(arr[4]);
-                section.idlist_city = CommonUtil.StringToListInt(arr[5], '#');                
-                foreach (int cityid in section.idlist_city) //子对象的一级父类在这初始化
+                DSection dsection = new DSection();
+                dsection.id = int.Parse(arr[0]);
+                dsection.alias = arr[1];
+                dsection.shortdesc = arr[2];
+                dsection.fulldesc = arr[3];
+                dsection.id_leadperson = int.Parse(arr[4]);
+                dsection.idlist_city = CommonUtil.StringToListInt(arr[5], '#'); //只保存一级子类      
+                foreach (int cityid in dsection.idlist_city) //子对象的一级父类在这初始化
                 {
                     if (cityid != -1 && dic_City.ContainsKey(cityid))
                     {
-                        DCityBuilding city =  dic_City[cityid];
-                        city.parentid_section = section.id;
+                        DCityBuilding city = dic_City[cityid];
+                        city.parentid_section = dsection.id;
+                    }
+                    else {
+                        LogTool.LogError("can not find city id" + cityid);
                     }
                 }                
-                dic_Section.Add(section.id, section);
+                dic_Section.Add(dsection.id, dsection);                
+                EntityMgr.Instacne.AddSectionFromData(dsection.id);
             }
         }
 
@@ -235,7 +247,7 @@ namespace RTSSanGuo
                 faction.shortdesc = arr[2];
                 faction.fulldesc = arr[3];
                 faction.id_leadperson = int.Parse(arr[4]);
-                faction.idlist_section = CommonUtil.StringToListInt(arr[5], '#');
+                faction.idlist_section = CommonUtil.StringToListInt(arr[5], '#'); //只保存一级子类
                 foreach (int sectionid in faction.idlist_section) //子对象的一级父类在这初始化
                 {
                     if (sectionid != -1 && dic_Section.ContainsKey(sectionid))
@@ -246,8 +258,31 @@ namespace RTSSanGuo
                 }
                 faction.idlist_wbuilding = CommonUtil.StringToListInt(arr[6], '#');
                 dic_Faction.Add(faction.id, faction);
+                EntityMgr.Instacne.AddFactionFromData(faction.id);
             }
         }
 
+
+        public DTroop AddNewTroopData(int trooptypeid) {
+            if (dic_TroopType.ContainsKey(trooptypeid))
+            {
+                DTroop troop = new DTroop();
+                int id = 1;
+                for (int i = 1; i < 9999; i++)
+                {
+                    if (dic_Troop.ContainsKey(i))
+                        id = i;
+                }
+                troop.id = id;
+                troop.id_trooptype = trooptypeid;
+                dic_Troop.Add(id, troop);
+                return troop;
+            }
+            else {
+                LogTool.LogError("can not find typeid" + trooptypeid);
+                return null;
+            }
+
+        }
     }
 }

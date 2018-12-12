@@ -13,7 +13,10 @@ namespace RTSSanGuo
         public int initid;//city 一开始就是在场景，和Data绑定必须和
 
         [SerializeField]
-        public DCityBuilding data;
+        private DCityBuilding data;
+        public DCityBuilding Data {
+            set { data = value; }
+        }
 
 #endif 
         #region warpdata
@@ -23,6 +26,9 @@ namespace RTSSanGuo
         {
             get { return data.id; }
         }
+
+        
+
         public override string Alias
         {
             get { return data.alias; }
@@ -162,6 +168,46 @@ namespace RTSSanGuo
             }
         }
 
+        //子一级
+        public List<int> IDList_Troop {
+            get {
+                return data.idlist_troop;//list也是对象
+            }
+        }
+
+        public Dictionary<int, Troop> dic_troop = new Dictionary<int, Troop>();
+
+
+        //子多层级
+
+
+        //父一级
+        public override Section ParentSection {
+            get {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                int  sectionid = data.parentid_section;
+                if (sectionid != -1 && EntityMgr.Instacne.dic_Section.ContainsKey(sectionid))
+                {
+                    return EntityMgr.Instacne.dic_Section[sectionid];
+                }
+                else {
+                    LogTool.LogError("can not find section " + sectionid);
+                    return null;
+                }
+            }
+        }
+        //public Section parentSection;
+        public override Faction ParentFaction
+        {
+            get
+            {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                return ParentSection.ParentFaction;
+            }
+        }
+
 
         #endregion
 
@@ -170,23 +216,15 @@ namespace RTSSanGuo
         {
             get
             {
-                return !parentFaction.isPlayer;
+                return !ParentSection.isPlayer;
             }
         }
-
-        public override bool CanAAttack 
-        {
-            get
-            {
-                return false; //非玩家阵营都可以被Attack
-            }
-        }
-
+        
         public override bool CanBeSelect
         {
             get
             {
-                return parentFaction.isPlayer; //非玩家阵营都可以被Attack
+                return ParentSection.isPlayer; //非玩家阵营都可以被Attack
             }
         }
 
@@ -196,8 +234,7 @@ namespace RTSSanGuo
 
         //子 一级
         public Dictionary<int, ProductionBuilding> dic_pbuilding = new Dictionary<int, ProductionBuilding>();
-        public Dictionary<int, WeaponBuilding> dic_wbuilding = new Dictionary<int, WeaponBuilding>();
-        public Dictionary<int, Troop> dic_troop = new Dictionary<int, Troop>();
+        public Dictionary<int, WeaponBuilding> dic_wbuilding = new Dictionary<int, WeaponBuilding>();       
         public Dictionary<int, Person> dic_person = new Dictionary<int, Person>();
 
         ////父 所有层级
@@ -207,17 +244,16 @@ namespace RTSSanGuo
 
         //子多级，实时计算
 
-        public void BuildTroop(int prefabid )
+        public void BuildTroop(int typeid )
         {
-             
-            Troop troop = EntityMgr.Instacne.AddTroopFromPrefab(prefabid, troopBornPoint.position);
-            //设置父
-            troop.parentCity = this;
-            troop.parentSection = this.parentSection;
-            troop.parentFaction = this.parentFaction;
-
-            dic_troop.Add(troop.ID, troop);
-            //子暂时不设置
+            DTroop dtroop =  DataMgr.Instacne.AddNewTroopData(typeid);
+            dtroop.origsoldiernum = 1000;
+            dtroop.cursoldiernum = 1000;
+            Troop troop = EntityMgr.Instacne.AddTroop(dtroop, troopBornPoint.position);
+            //设置子对象        
+            data.idlist_troop.Add(dtroop.id);      
+            //子对象设置父对象
+            dtroop.parentid_city = ID;
 
 
             troop.targetType = ETroopTargetType.MoveToPoint;

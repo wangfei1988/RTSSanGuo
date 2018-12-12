@@ -58,14 +58,14 @@ namespace RTSSanGuo
         public virtual void  ReadCsv(string filePath)
         {
             csvFilePath = filePath;
-            FileStream fs = new FileStream(filePath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            FileStream fs = new FileStream(filePath, System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Read);
             StreamReader sr = new StreamReader(fs, csvEncoding);
 
             //记录每次读取的一行记录
             string strLine = "";             
             commentLines.Clear();
             valueLines.Clear();
-            while ((strLine = sr.ReadLine()) != null)
+            while ((strLine = sr.ReadLine()) != null && strLine.Length>5)
             {
                 if (strLine.StartsWith(commentStr))
                 {

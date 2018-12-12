@@ -20,14 +20,13 @@ namespace RTSSanGuo
         }
         
         public Dictionary<int, GameObject> dic_TroopPrefab = new Dictionary<int, GameObject>();
-
+        public int[] troopPrefabIDArray;
         public GameObject[] troopPrefabArray;
         private void Start()
         {
-            foreach (GameObject go in troopPrefabArray) {
-               int prefabid = go.transform.GetComponent<Troop>().ResID;
-                dic_TroopPrefab.Add(prefabid, go);
-            }
+            for (int i = 0; i < troopPrefabIDArray.Length; i++) {
+                dic_TroopPrefab.Add(troopPrefabIDArray[i], troopPrefabArray[i]);
+            }             
             StartCoroutine(LoadResData());
         }
 

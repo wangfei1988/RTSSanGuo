@@ -29,7 +29,12 @@ namespace RTSSanGuo
         }
 
         private IEnumerator StartGame() {
-            yield return new WaitForSeconds(2);
+            while (!DataMgr.Instacne.hasInitAllData)
+                yield return null;
+            DataMgr.Instacne.LoadSaveData(1);            
+            state = EGameState.Loading;
+            while (DataMgr.Instacne.loadPercent<100)
+                yield return null;
             state = EGameState.Running;
             SelectionMgr.Instacne.CanSelection = true;
         }

@@ -1,4 +1,4 @@
-﻿###,,,,,,ȡ�����ѡ��ֱ�ӹ̶���Prefab����,,
-##id,alias,shordesc,fulldesc,baseatk,basedef,baseremoteatkrange(������ֺ���ײ���Сһ��),basemovespeed,resid
-1,LiuBeiTroop,,,100,100,,3.5,1
-2,CaoCaoTroop,,,100,100,,3.5,2
+###,,,,,,????????????????Prefab????,,
+##id,alias,shordesc,fulldesc,baseatk,basedef,baseremoteatkrange(??????????????��???),basemovespeed,resid
+1,LiuBeiTroop,,,100,100,2,3.5,1
+2,CaoCaoTroop,,,100,100,2,3.5,2

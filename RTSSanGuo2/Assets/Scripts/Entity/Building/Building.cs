@@ -24,16 +24,9 @@ namespace RTSSanGuo
 
 
         //父 所有层级
-        public Faction parentFaction;
-        public Section parentSection;
-
-        //public int hp;
-        //public int maxhp;
-        //public int atk;
-        //public int def;
-
         
 
+          
 
         public Action onHpChange;
         public virtual void DefAttackTroop(Troop troop) //反击

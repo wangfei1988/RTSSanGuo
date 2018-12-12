@@ -12,7 +12,7 @@ namespace RTSSanGuo
         public int baseatk;
         public int basedef;
         public int baseremoteatkrange;
-        public int basemovespeed;
+        public float basemovespeed;
         public int resid;
     }
 }

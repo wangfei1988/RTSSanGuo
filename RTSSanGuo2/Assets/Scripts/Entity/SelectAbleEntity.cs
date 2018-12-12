@@ -15,14 +15,7 @@ namespace RTSSanGuo
                 return false; //非玩家阵营都可以被Attack
             }
         }
-
-        public virtual bool CanAAttack
-        {
-            get
-            {
-                return false; //非玩家阵营都可以被Attack
-            }
-        }
+        
 
         public virtual bool CanBeSelect
         {
@@ -31,14 +24,10 @@ namespace RTSSanGuo
                 return false; //非玩家阵营都可以被Attack
             }
         }
+           
 
-        public virtual bool IsPlayerCtr {
-            get {
-                return true;
-            }
-        }
-
-
+        public virtual Faction ParentFaction { get { return null; } }
+        public virtual Section ParentSection { get { return null; } }
 
         public virtual int CurHP
         {

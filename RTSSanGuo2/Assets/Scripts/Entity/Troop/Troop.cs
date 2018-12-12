@@ -17,7 +17,10 @@ namespace RTSSanGuo
     {
 
 #if TestTT
-        public DTroop data;
+        public DTroop data =null;//这个只在内部使用，外部使用必须通过Wrap
+        public DTroop Data {
+            set { data = value; }
+        }
 #endif
         #region  basic warp data  
         //基础属性的warp
@@ -80,12 +83,13 @@ namespace RTSSanGuo
 
         public DTroopType TypeData {
             get {
+
                 return DataMgr.Instacne.dic_TroopType[data.id_trooptype];
             }
         }
 
          
-        public virtual int Atk //近战只会破坏城防，不会破坏hp，只有射箭才会
+        public override int Atk //近战只会破坏城防，不会破坏hp，只有射箭才会
         {
             get
             {
@@ -94,7 +98,7 @@ namespace RTSSanGuo
         }
 
         
-        public virtual int Def
+        public override int Def
         {
             get
             {
@@ -102,7 +106,7 @@ namespace RTSSanGuo
             }
         }
 
-        public virtual int MoveSpeed
+        public virtual float MoveSpeed
         {
             get
             {
@@ -110,30 +114,20 @@ namespace RTSSanGuo
             }
         }
 
-          
-
-
         public override bool CanBeAttack
         {
             get
             {
-                return !parentFaction.isPlayer;
+                return !ParentFaction.isPlayer;
             }
         }
 
-        public override bool CanAAttack
-        {
-            get
-            {
-                return true; //非玩家阵营都可以被Attack
-            }
-        }
 
         public override bool CanBeSelect
         {
             get
             {
-                return parentFaction.isPlayer; //非玩家阵营都可以被Attack
+                return ParentFaction.isPlayer; //非玩家阵营都可以被Attack
             }
         }
 
@@ -141,10 +135,45 @@ namespace RTSSanGuo
         public Person person2;
         public Person person3;
 
-        public Faction parentFaction;
-        public Section parentSection;
-        public CityBuilding parentCity;
-
+        // public Faction parentFaction;
+        // public Section parentSection;
+        public virtual CityBuilding ParentCity
+        {
+            get
+            {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                int cityid = data.parentid_city;
+                if (cityid != -1 && EntityMgr.Instacne.dic_City.ContainsKey(cityid))
+                {
+                    return EntityMgr.Instacne.dic_City[cityid];
+                }
+                else
+                {
+                    LogTool.LogError("can not find section " + cityid);
+                    return null;
+                }
+            }
+        }
+        public override Section ParentSection
+        {
+            get
+            {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                return ParentCity.ParentSection;
+            }
+        }
+        //public Section parentSection;
+        public override Faction ParentFaction
+        {
+            get
+            {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                return ParentSection.ParentFaction;
+            }
+        }
         #endregion
 
         //Troop 有2个Trigger  Selection 和Attack
@@ -198,7 +227,7 @@ namespace RTSSanGuo
         }
         //Trigger并不会改变目标
         private void TriggerTroop(Troop troop) {
-            if (troop.parentFaction == this.parentFaction)
+            if (troop.ParentFaction == this.ParentFaction)
                 return;
             else
                 CheckAutoNearAttackTroop(troop);
@@ -206,7 +235,7 @@ namespace RTSSanGuo
 
         private void TriggerBuilding(Building building)
         {
-            if (building.parentFaction == this.parentFaction)
+            if (building.ParentFaction == this.ParentFaction)
                 return;
             else
                 CheckAutoNearAttackBuilding(building);
@@ -392,7 +421,7 @@ namespace RTSSanGuo
             }
             else if (targetType == ETroopTargetType.MoveIntoBuilding)
             {
-                if (targetBuilding != null && targetBuilding.parentFaction == this.parentFaction)
+                if (targetBuilding != null && targetBuilding.ParentFaction == this.ParentFaction)
                 {
                     CityBuilding parentCity = targetBuilding as CityBuilding;
                     if (!interActionCheck.list_InterBuilding.Contains(targetBuilding))
@@ -407,7 +436,7 @@ namespace RTSSanGuo
                         return;
                     }
                 }
-                else if (targetBuilding != null && targetBuilding.parentFaction != this.parentFaction)
+                else if (targetBuilding != null && targetBuilding.ParentFaction != this.ParentFaction)
                 {
                     targetType = ETroopTargetType.AttackBuilding;
 

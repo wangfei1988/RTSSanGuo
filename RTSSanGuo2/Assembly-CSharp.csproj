@@ -66,7 +66,8 @@
     <Compile Include="Assets\Scripts\Data\DataBase.cs" />
     <Compile Include="Assets\Scripts\Data\DColor.cs" />
     <Compile Include="Assets\Scripts\Data\Faction\DFaction.cs" />
-    <Compile Include="Assets\Scripts\Data\GlobalData\DGlobalData.cs" />
+    <Compile Include="Assets\Scripts\Data\GlobalData\DSaveData.cs" />
+    <Compile Include="Assets\Scripts\Data\GlobalData\DScenerialData.cs" />
     <Compile Include="Assets\Scripts\Data\Person\DPerson.cs" />
     <Compile Include="Assets\Scripts\Data\Section\DSection.cs" />
     <Compile Include="Assets\Scripts\Data\Troop\DTroop.cs" />
@@ -98,6 +99,10 @@
     <Compile Include="Assets\Scripts\UI\Hud\HudCity.cs" />
     <Compile Include="Assets\Scripts\UI\Hud\HudMgr.cs" />
     <Compile Include="Assets\Scripts\UI\Hud\HudTroop.cs" />
+    <Compile Include="Assets\Scripts\Util\CommonUtil.cs" />
+    <Compile Include="Assets\Scripts\Util\CSVFile.cs" />
+    <Compile Include="Assets\Scripts\Util\LogTool.cs" />
+    <Compile Include="Assets\Scripts\Util\PathTool.cs" />
     <Compile Include="Assets\Test\NavMesh\TestNavmesh01.cs" />
     <Compile Include="Assets\Test\NavMesh\TestNavmesh02.cs" />
     <Compile Include="Assets\Test\Test.cs" />

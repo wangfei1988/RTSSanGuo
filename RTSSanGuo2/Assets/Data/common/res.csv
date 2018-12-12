@@ -1,5 +1,5 @@
 ##被ResourceManage单独加载,,,,,,
-## 是更具顺序定位,,1Troop,,,,
+## 是更具顺序定位,,1Troop,#已经在Inspetor赋值，无需加载,,,
 ##id,alias,type,inInspector,respath,bundlePath,inbundlePath
 1,LiuBeiTroopPrefab01,1,TRUE,,,
 2,CaoCaoTroopPrefab01,1,TRUE,,,

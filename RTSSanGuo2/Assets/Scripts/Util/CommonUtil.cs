@@ -8,6 +8,8 @@ namespace RTSSanGuo
     {
         public static List<int> StringToListInt(string str ,char sep) {
             List<int> list = new List<int>();
+            if (str.Trim()=="") return list;
+
             string[] strarr= str.Split(sep);
             foreach (string strdata in strarr) {
                 list.Add(int.Parse(strdata.Trim()));

@@ -31,22 +31,22 @@ namespace RTSSanGuo
 
         private void Start()
         {
-            loadedFaction = GetComponentsInChildren<Faction>();
-            foreach (Faction fac in loadedFaction) {
-                dic_Faction.Add(fac.ID, fac);
-            }
+            //loadedFaction = GetComponentsInChildren<Faction>();
+            //foreach (Faction fac in loadedFaction) {
+            //    dic_Faction.Add(fac.ID, fac);
+            //}
 
-            loadedSection = GetComponentsInChildren<Section>();
-            foreach (Section fac in loadedSection)
-            {
-                dic_Section.Add(fac.ID, fac);
-            }
-            loadedCity = GetComponentsInChildren<CityBuilding>();
-            foreach (CityBuilding city in loadedCity)
-            {
-                dic_City.Add(city.ID, city);
-                HudMgr.Instacne.AddHudCity(city.ID);                
-            }
+            //loadedSection = GetComponentsInChildren<Section>();
+            //foreach (Section fac in loadedSection)
+            //{
+            //    dic_Section.Add(fac.ID, fac);
+            //}
+            //loadedCity = GetComponentsInChildren<CityBuilding>();
+            //foreach (CityBuilding city in loadedCity)
+            //{
+            //    dic_City.Add(city.ID, city);
+            //    HudMgr.Instacne.AddHudCity(city.ID);                
+            //}
 
         }
 
@@ -79,8 +79,8 @@ namespace RTSSanGuo
             Troop troop= dic_Troop[id];
             HudMgr.Instacne.DelHudTroop(id); //先移除Hud
             //先移除父对象对他的引用
-            if (troop.parentCity && troop.parentCity.dic_troop.ContainsKey(id))
-                troop.parentCity.dic_troop.Remove(id);
+            if (troop.ParentCity && troop.ParentCity.dic_troop.ContainsKey(id))
+                troop.ParentCity.dic_troop.Remove(id);
             //再移除子对象对他的引用
 
             dic_Troop.Remove(id); //再移除id         
@@ -89,19 +89,20 @@ namespace RTSSanGuo
         }
 
         //主要操作的还是Troop 
-        //prefabid --也可以看做typetype 类型的类型  数据就是Prefab的数据
-        public Troop AddTroopFromPrefab(int prefabid,Vector3 pos)
+        //必须先把数据data准备好，然后才是Entity
+        public Troop AddTroop(DTroop dtroop, Vector3 pos)
         {
+            int prefabid = dtroop.id_trooptype;
             GameObject prefab = ResMgr.Instacne.dic_TroopPrefab[prefabid];
             GameObject go = Instantiate(prefab) as GameObject;
             go.transform.position = pos;
             go.transform.SetParent(troopEntityParent, true); //这个设置不设置不影响坐标，因为troopEntityParent 本身就在原点
             Troop troop = go.GetComponent<Troop>();
             //需要建立Data对象  这里先忽略，直接使用prefab数据
-            int id = GetValidTroopID();
-            dic_Troop.Add(id, troop);
+            troop.Data = dtroop;
+            dic_Troop.Add(troop.ID, troop);
             go.SetActive(true);
-            HudMgr.Instacne.AddHudTroop(id);
+            HudMgr.Instacne.AddHudTroop(troop.ID);
 
             return troop; //这里只负责返回，父子关系由调用者处理            
         }
@@ -115,8 +116,11 @@ namespace RTSSanGuo
         public void  InitAllCityData() {            
             CityBuilding[] cities = cityEntityParent.GetComponentsInChildren<CityBuilding>();
             foreach (CityBuilding city in cities) {
-                if (DataMgr.Instacne.dic_City.ContainsKey(city.initid))
-                    city.data = DataMgr.Instacne.dic_City[city.initid];
+                if (DataMgr.Instacne.dic_City.ContainsKey(city.initid)) {
+                    city.Data = DataMgr.Instacne.dic_City[city.initid];
+                    dic_City.Add(city.ID, city);
+                    HudMgr.Instacne.AddHudCity(city.ID);
+                }                    
                 else
                 {
                     LogTool.LogError("DataMgr not have id " + city.initid);
@@ -125,7 +129,7 @@ namespace RTSSanGuo
         }
 
         public Section AddSectionFromData(int sectionid) {
-            if (DataMgr.Instacne.dic_Section.ContainsKey(sectionid))
+            if (!DataMgr.Instacne.dic_Section.ContainsKey(sectionid))
             {
                 LogTool.LogError("DataMgr not have id " + sectionid);
                 return null;
@@ -135,7 +139,28 @@ namespace RTSSanGuo
             go.transform.SetParent(sectionEntityParent);
             Section section = go.AddComponent<Section>();
             section.data = dsection;
+            dic_Section.Add(section.ID, section);
+            if (section.ID == DataMgr.Instacne.selSaveData.id_playerSection)
+                section.isPlayer = true;
             return section;
+        }
+
+        public Faction AddFactionFromData(int factionid)
+        {
+            if (!DataMgr.Instacne.dic_Faction.ContainsKey(factionid))
+            {
+                LogTool.LogError("DataMgr not have id " + factionid);
+                return null;
+            }
+            DFaction dfaction = DataMgr.Instacne.dic_Faction[factionid];
+            GameObject go = new GameObject();
+            go.transform.SetParent(factionEntityParent);
+            Faction faction = go.AddComponent<Faction>();
+            faction.data = dfaction;
+            dic_Faction.Add(faction.ID, faction);
+            if (faction.ID == DataMgr.Instacne.selSaveData.id_playerFaction)
+                faction.isPlayer = true;
+            return faction;
         }
 
 
