@@ -1,0 +1,48 @@
+﻿1 Data---- 纯粹只是数据--可以写到文件
+2 Entity ---绑定一个Data    和UEntity 双向绑定
+3 UEntity -----这个只能做成prefab
+
+
+Data 数据文件  
+
+静态数据，写入源代码
+SettingData-----
+通用数据---
+ScenerialData
+
+
+
+技能
+1 五维 被动内政技能    作用域建筑物+百分比
+
+2 五维  适性  被动攻击技能  +  科技    + 战斗数值 +百分比  （atk +def +range）    基础数值 Troop种类 
+科技 能否制造某类建筑 Troop
+初始化Troop就设置好了
+士气 -----百分比。阶梯
+
+3 主动技能 生成EffectObj----每个EffectObj 都有prefab
+一次性 (减少士气 )
+持续性（range  士气  speed  soldier %）-----gameobject 置于
+Effect 对象
+
+有试用Troop 类型   计谋类型就没有
+
+
+Pbuilding 
+Wbuilding
+
+
+
+AI部分--复杂
+简单做法 City Country Section 寻找周围比自己弱的 Attack  一次一个目标 （不考虑已经发送出去的）   Defend 集合附近  Defend 优先
+Troop---发送的时候有target，直追。除非被拦路
+
+
+
+
+
+
+先成了再说，代码不规范
+
+
+
