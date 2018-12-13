@@ -10,8 +10,9 @@ namespace RTSSanGuo
     {
 
         #region wrap data
+
         public DFaction data;
-        //Wrap 数据
+        /*******wrap basic ************/
         public override int ID
         {
             get { return data.id; }
@@ -31,7 +32,7 @@ namespace RTSSanGuo
             get { return data.fulldesc; }
         }
 
-        //一级子对象（记录在data）+多级子对象
+        /******一级子对象（id直接记录在data）+ 多级子对象（id 没有记录 通过级联获取）******/
         public Dictionary<int, Section> Dic_Section {
             get {
                 if (!DataMgr.Instacne.dataPrepared)
@@ -46,7 +47,7 @@ namespace RTSSanGuo
             }
         }
 
-        //一级父对象（没有记录在data，但是加载data时反向推算） +多级父对象
+         /******一级父对象（没有记录在data，但是加载data时反向推算） +多级父对象******/
 
         #endregion
 

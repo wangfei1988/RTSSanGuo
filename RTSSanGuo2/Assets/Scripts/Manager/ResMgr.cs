@@ -20,23 +20,28 @@ namespace RTSSanGuo
         }
         
         public Dictionary<int, GameObject> dic_TroopPrefab = new Dictionary<int, GameObject>();
+#if Test
         public int[] troopPrefabIDArray;
         public GameObject[] troopPrefabArray;
+#endif
         private void Start()
         {
+#if Test 
             for (int i = 0; i < troopPrefabIDArray.Length; i++) {
                 dic_TroopPrefab.Add(troopPrefabIDArray[i], troopPrefabArray[i]);
-            }             
+            }
+#endif
             StartCoroutine(LoadResData());
+            
         }
 
         public bool hasInitAllData = false;
-        private CSVFile csvfile=null;
+        private CSVFile resCsvfile=null;
         private IEnumerator LoadResData() {
             string filePath = PathTool.DataFileRootFold + "/common/Res.csv";
-            csvfile = new CSVFile();
-            csvfile.ReadCsv(filePath);
-            foreach (string[] arr in csvfile.valueLines) {
+            resCsvfile = new CSVFile();
+            resCsvfile.ReadCsv(filePath);
+            foreach (string[] arr in resCsvfile.valueLines) {
                 if (arr.Length != 7) continue;
                 int id = int.Parse(arr[0]);
                 string alias =arr[1];

@@ -1,6 +1,7 @@
-#ignore all file  几乎所有文件都有后缀名，这个排除了文件夹
+﻿#ignore all file  几乎所有文件都有后缀名，这个排除了文件夹
 *.*  
-*Library/metadata/*
+/RTSSanGuo/Library/
+/RTSSanGuo2/Library/
 #keep fold 3rd
 !/3rddll/*.*
 

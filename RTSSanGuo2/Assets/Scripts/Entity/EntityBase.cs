@@ -8,7 +8,9 @@ using UnityEngine;
 namespace RTSSanGuo
 {
     public  class EntityBase:MonoBehaviour
-    {            
+    {
+#region wrap data
+        /*******wrap basic ************/
         public virtual  int ID {
             get  { return -1; }
         }
@@ -24,6 +26,6 @@ namespace RTSSanGuo
         {
             get { return ""; }
         }
-        
+#endregion
     }
 }
