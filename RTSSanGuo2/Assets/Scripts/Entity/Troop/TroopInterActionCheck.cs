@@ -9,18 +9,10 @@ public class TroopInterActionCheck : MonoBehaviour {
     public List<Building> list_InterBuilding = new List<Building>();
     public List<Troop> list_Intertroop = new List<Troop>();
 
-    private void Awake()
-    {
-        
-    }
-
-    public Action<Transform> OnTriggerInterAction;
+         
     private void OnTriggerStay(Collider other)
     {
-       // Debug.Log(other.gameObject + "ontigerStay");
-        if (other.transform.tag == "InterAction") {
-            OnTriggerInterAction(other.transform.parent);
-        }
+        
     }
     private void OnTriggerEnter(Collider other)
     {

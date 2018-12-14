@@ -7,7 +7,7 @@ using System.Text;
 using UnityEngine;
 namespace RTSSanGuo
 {
-    public enum EGameState {Init,Loading,Running,Pause,UIPause,Finish}
+    public enum EGameState {Init,Loading,Running,Pause,Finish}
     //有些不需要继承monobehavior 但是为了统一全部继承
     public class GameMgr : MonoBehaviour
     {
@@ -40,6 +40,22 @@ namespace RTSSanGuo
         }
 
 #endif
+        private float speed=1f; //0.25  0.5  1  2  4     暂停时 -1 
+        public float RunSpeed {
+            get {
+                return speed;
+            }
+            set {
+                 speed = value;
+            }
+        }
 
+        public void Stop() {
+            state = EGameState.Pause;
+        }
+        public void Resume() {
+            state = EGameState.Running;
+        }
+        
     }
 }

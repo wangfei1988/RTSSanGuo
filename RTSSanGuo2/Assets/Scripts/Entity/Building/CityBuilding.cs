@@ -11,24 +11,20 @@ namespace RTSSanGuo
     {
 #if Testttt
         public int initid;//city 一开始就是在场景，和Data绑定必须和
-
+#endif 
         [SerializeField]
         private DCityBuilding data;
         public DCityBuilding Data {
             set { data = value; }
         }
 
-#endif 
-        #region warpdata
 
-        //基础属性的warp
+        #region wrapdata
+        /*******wrap basic本身 ************/
         public override int ID
         {
             get { return data.id; }
         }
-
-        
-
         public override string Alias
         {
             get { return data.alias; }
@@ -58,8 +54,6 @@ namespace RTSSanGuo
                 }
             }
         }
-
-
         public override int MaxHP
         {
             get {
@@ -75,7 +69,93 @@ namespace RTSSanGuo
                     return 5000;
             } 
         }
+        public override int Atk //近战只会破坏城防，不会破坏hp，只有射箭才会
+        {
+            get
+            {
+                if (data.population < 100000)
+                    return 100;
+                else if (data.population < 200000)
+                    return 200;
+                else if (data.population < 500000)
+                    return 300;
+                else if (data.population < 1000000)
+                    return 400;
+                else
+                    return 500;
+            }
+        }   public override int Def
+        {
+            get
+            {
+                if (data.population < 100000)
+                    return 200;
+                else if (data.population < 200000)
+                    return 400;
+                else if (data.population < 500000)
+                    return 600;
+                else if (data.population < 1000000)
+                    return 800;
+                else
+                    return 1000;
+            }
+        }
+        /******一级子对象（id直接记录在data）+ 多级子对象（通过级联获取）******/
+        public List<int> IDList_Troop  //修改只能修改这个
+        {
+            get
+            {
+                return data.idlist_troop;//list也是对象
+            }
+        }
+        // 下面这个只能读取,不能读取后修改
+        public Dictionary<int, Troop> Dic_troop {
+            get
+            {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                Dictionary<int, Troop> dic = new Dictionary<int, Troop>();
+                foreach (int troopid in data.idlist_troop)
+                {
+                    if (EntityMgr.Instacne.dic_City.ContainsKey(troopid))
+                    {
+                        dic.Add(troopid, EntityMgr.Instacne.dic_Troop[troopid]);
+                    }
+                }
+                return dic;
+            }
+        }
 
+        /******一级父对象（id在子对象有，但是是反向推算） +多级父对象（通过级联获取）******/
+        public override Section ParentSection
+        {
+            get
+            {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                int sectionid = data.parentid_section;
+                if (sectionid != -1 && EntityMgr.Instacne.dic_Section.ContainsKey(sectionid))
+                {
+                    return EntityMgr.Instacne.dic_Section[sectionid];
+                }
+                else
+                {
+                    LogTool.LogError("can not find section " + sectionid);
+                    return null;
+                }
+            }
+        }
+        public override Faction ParentFaction
+        {
+            get
+            {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                return ParentSection.ParentFaction;
+            }
+        }
+
+        /******其他Wrap******/
         public virtual int CurTotalSoldierNum  //血条显示这个为max 
         {
             get
@@ -115,10 +195,7 @@ namespace RTSSanGuo
                 return sendout;
             }
         }
-
-
-
-
+                
         public virtual int MaxSoldierNum //
         {
             get
@@ -130,103 +207,40 @@ namespace RTSSanGuo
             get { return 0.05f;  }
         }
 
-
-        public override int Atk //近战只会破坏城防，不会破坏hp，只有射箭才会
+        public override bool IsPlayer
         {
-            get
-            {
-                if (data.population < 100000)
-                    return 100;
-                else if (data.population < 200000)
-                    return 200;
-                else if (data.population < 500000)
-                    return 300;
-                else if (data.population < 1000000)
-                    return 400;
-                else
-                    return 500;
-            }        
+            get { return ParentSection.isPlayer; }
         }
-
-
-
-
-        public override int Def
-        {
-            get
-            {
-                if (data.population < 100000)
-                    return 200;
-                else if (data.population < 200000)
-                    return 400;
-                else if (data.population < 500000)
-                    return 600;
-                else if (data.population < 1000000)
-                    return 800;
-                else
-                    return 1000;
-            }
-        }
-
-        //子一级
-        public List<int> IDList_Troop {
-            get {
-                return data.idlist_troop;//list也是对象
-            }
-        }
-
-        public Dictionary<int, Troop> dic_troop = new Dictionary<int, Troop>();
-
-
-        //子多层级
-
-
-        //父一级
-        public override Section ParentSection {
-            get {
-                if (!DataMgr.Instacne.dataPrepared)
-                    LogTool.LogError("data not prepared");
-                int  sectionid = data.parentid_section;
-                if (sectionid != -1 && EntityMgr.Instacne.dic_Section.ContainsKey(sectionid))
-                {
-                    return EntityMgr.Instacne.dic_Section[sectionid];
-                }
-                else {
-                    LogTool.LogError("can not find section " + sectionid);
-                    return null;
-                }
-            }
-        }
-        //public Section parentSection;
-        public override Faction ParentFaction
-        {
-            get
-            {
-                if (!DataMgr.Instacne.dataPrepared)
-                    LogTool.LogError("data not prepared");
-                return ParentSection.ParentFaction;
-            }
-        }
-
-
-        #endregion
-
 
         public override bool CanBeAttack
         {
             get
             {
-                return !ParentSection.isPlayer;
+                return !IsPlayer;
             }
         }
-        
+
         public override bool CanBeSelect
         {
             get
             {
-                return ParentSection.isPlayer; //非玩家阵营都可以被Attack
+                return IsPlayer; //非玩家阵营都可以被Attack
             }
         }
+
+
+        //子一级
+       
+
+
+        //子多层级
+
+
+
+
+        #endregion
+
+       
 
         public Transform RollyPoint;
         public Transform troopBornPoint;
@@ -246,25 +260,12 @@ namespace RTSSanGuo
 
         public void BuildTroop(int typeid )
         {
-            DTroop dtroop =  DataMgr.Instacne.AddNewTroopData(typeid);
-            dtroop.origsoldiernum = 1000;
-            dtroop.cursoldiernum = 1000;
-            Troop troop = EntityMgr.Instacne.AddTroop(dtroop, troopBornPoint.position);
-            //设置子对象        
-            data.idlist_troop.Add(dtroop.id);      
-            //子对象设置父对象
-            dtroop.parentid_city = ID;
-
-
-            troop.targetType = ETroopTargetType.MoveToPoint;
-            troop.MoveToPoint(RollyPoint.position);
-
+            EntityMgr.Instacne.AddTroop(typeid, data, troopBornPoint.position , RollyPoint.position ,1000,1,-1,-1 );             
         }
 
         public void EnterTroop(Troop troop) {
             
         }
-
         public override void DefAttackTroop(Troop troop) //反击
         {
             float damage = this.Atk * (this.Atk / troop.Def);  //this.atk / troop.def 伤害吸收率

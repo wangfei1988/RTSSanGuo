@@ -16,14 +16,13 @@ namespace RTSSanGuo
     public  class Troop:SelectAbleEntity
     {
 
-#if TestTT
-        public DTroop data =null;//这个只在内部使用，外部使用必须通过Wrap
+        private DTroop data =null;//这个只在内部使用，外部使用必须通过Wrap
         public DTroop Data {
             set { data = value; }
         }
-#endif
-        #region  basic warp data  
-        //基础属性的warp
+
+        #region wrap data
+        /*******wrap basic本身 ************/
         public override int ID
         {
             get { return data.id; }
@@ -54,89 +53,86 @@ namespace RTSSanGuo
         {
             get { return data.fulldesc; }
         }
-
-        public override int CurHP
+        public DTroopType TypeData
         {
             get
-            {                 
-                return data.cursoldiernum;
-            }
-            set
             {
-                data.cursoldiernum = value;
-                if (data.cursoldiernum > data.origsoldiernum)
-                    data.cursoldiernum = data.origsoldiernum;
-                if (data.cursoldiernum <= 0)
-                {
-                    //被占领
-                }
-            }
-        }
-              
-        public override int MaxHP  //血条显示这个为max 
-        {
-            get
-            {                
-                return data.origsoldiernum;
-            }
-        }
-
-        public DTroopType TypeData {
-            get {
 
                 return DataMgr.Instacne.dic_TroopType[data.id_trooptype];
             }
         }
-
-         
-        public override int Atk //近战只会破坏城防，不会破坏hp，只有射箭才会
+        public float MoveSpeed
         {
             get
-            {
-                return TypeData.baseatk;
+            {                
+                return TypeData.basemovespeed/GameMgr.Instacne.RunSpeed;
             }
         }
-
-        
-        public override int Def
+        public float AtkFrequency
         {
             get
-            {
-                return TypeData.baseatk;
-            }
-        }
-
-        public virtual float MoveSpeed
-        {
-            get
-            {
-                return TypeData.basemovespeed;
-            }
-        }
-
-        public override bool CanBeAttack
-        {
-            get
-            {
-                return !ParentFaction.isPlayer;
+            {                 
+                return TypeData.baseatkfrequency / GameMgr.Instacne.RunSpeed; 
+                //长期Skill 无论near 还是remote 都是受到整个影响
+                //一次性 以及释放对象的skill不 被影响
             }
         }
 
 
-        public override bool CanBeSelect
+        /******一级子对象（id直接记录在data）+ 多级子对象（通过级联获取）全局唯一的东西 **********************/
+        public Person Person1 {
+            get
+            {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                int personid = data.id_person1;
+                if (personid != -1 && EntityMgr.Instacne.dic_Person.ContainsKey(personid))
+                {                    
+                    return EntityMgr.Instacne.dic_Person[personid];
+                }
+                else
+                {
+                    LogTool.LogError("can not find section " + personid);
+                    return null;
+                }
+            }
+        }
+        public Person Person2
         {
             get
             {
-                return ParentFaction.isPlayer; //非玩家阵营都可以被Attack
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                int personid = data.id_person2;
+                if (personid != -1 && EntityMgr.Instacne.dic_Person.ContainsKey(personid))
+                {
+                    return EntityMgr.Instacne.dic_Person[personid];
+                }
+                else
+                {                     
+                    return null;
+                }
+            }
+        }
+        public Person Person3
+        {
+            get
+            {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                int personid = data.id_person3;
+                if (personid != -1 && EntityMgr.Instacne.dic_Person.ContainsKey(personid))
+                {
+                    return EntityMgr.Instacne.dic_Person[personid];
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
-        public Person person1;
-        public Person person2;
-        public Person person3;
-
-        // public Faction parentFaction;
-        // public Section parentSection;
+        /******一级父对象（id在子对象有，但是是反向推算） +多级父对象（通过级联获取）******/
         public virtual CityBuilding ParentCity
         {
             get
@@ -174,6 +170,147 @@ namespace RTSSanGuo
                 return ParentSection.ParentFaction;
             }
         }
+
+        /******其他Wrap******/
+        public override int CurHP
+        {
+            get
+            {                 
+                return data.cursoldiernum;
+            }
+            set
+            {
+                data.cursoldiernum = value;
+                if (data.cursoldiernum > data.origsoldiernum)
+                    data.cursoldiernum = data.origsoldiernum;
+                if (data.cursoldiernum <= 0)
+                {
+                    //被占领
+                }
+            }
+        }
+              
+        public override int MaxHP  //血条显示这个为max 
+        {
+            get
+            {                
+                return data.origsoldiernum;
+            }
+        }
+
+        public float AtkDefMult_WuWei {
+            get {
+                //60 为准  最大50+%
+                return ((Person1.Tong + Person1.Wu) / 2 - 60) / 120.0f;
+            }
+        }
+        public float AtkDefMult_ShiXing
+        {
+            get
+            {
+                ETroopKind kind = TypeData.kind;
+                //最大+60%  S=5   A  B  C  D
+                float personshixingmult = 0f;
+                if (kind == ETroopKind.BuBing)
+                {
+                    personshixingmult += (Person1.Level_BuBing - 2) * 0.2f;
+                }
+                else if (kind == ETroopKind.QiBing)
+                {
+                    personshixingmult += (Person1.Level_QiBing - 2) * 0.2f;
+                }
+                else if (kind == ETroopKind.GongCheng)
+                {
+                    personshixingmult += (Person1.Level_GongChen - 2) * 0.2f;
+                }
+                else if (kind == ETroopKind.GongBing)
+                {
+                    personshixingmult += (Person1.Level_GongBing - 2) * 0.2f;
+                }
+                else if (kind == ETroopKind.ShuiBing)
+                {
+                    personshixingmult += (Person1.Level_ShuiBing - 2) * 0.2f;
+                }
+                return personshixingmult;
+            }
+        }
+
+        
+        public float AtkMult_BeiSkill {
+            get { return 0f; }
+        }
+
+        public float DefMult_BeiSkill
+        {
+            get { return 0f; }
+        }
+        public float AtkRangeAdd_BeiSkill //绝对值
+        {
+            get { return 0f; }
+        }
+        public float MoveSpeedAdd_BeiSkill
+        {
+            get { return 0f; }
+        }
+
+        public float AtkMult_Tech
+        {
+            get { return 0f; }
+        }
+
+        public float DefMult_Tech
+        {
+            get { return 0f; }
+        }
+        public float AtkRangeAdd_Tech //绝对值
+        {
+            get { return 0f; }
+        }
+        public float MoveSpeedAdd_Tech
+        {
+            get { return 0f; }
+        }
+
+        public override int Atk //近战只会破坏城防，不会破坏hp，只有射箭才会
+        {
+            get
+            {
+                int atk = (int) (TypeData.baseatk*(1 + AtkDefMult_WuWei + AtkDefMult_ShiXing));
+                return atk;
+            }
+        }
+                
+        public override int Def
+        {
+            get
+            {
+                int def = (int)(TypeData.basedef * (1 + AtkDefMult_WuWei + AtkDefMult_ShiXing));
+                return def;
+            }
+        }
+        public override bool IsPlayer
+        {
+            get { return ParentSection.isPlayer; }
+        }
+
+        public override bool CanBeAttack
+        {
+            get
+            {
+                return !IsPlayer;
+            }
+        }
+
+        public override bool CanBeSelect
+        {
+            get
+            {
+                return IsPlayer; //非玩家阵营都可以被Attack
+            }
+        }
+
+        
+       
         #endregion
 
         //Troop 有2个Trigger  Selection 和Attack
@@ -194,30 +331,11 @@ namespace RTSSanGuo
         public void Awake()
         {
             agent = GetComponent<NavMeshAgent>();
-            interActionCheck.OnTriggerInterAction += OnTrigggerOther;
-            Init();
-        }
-
-        public void Init()
-        {
             agent.speed = MoveSpeed;
-             
         }
 
-
-        //Trigger自动触发，而非命令
-        private void OnTrigggerOther(Transform transform) {
-            //Debug.Log("Trigger" + transform.name);
-          SelectAbleEntity entity = transform.GetComponent<SelectAbleEntity>();
-            if (entity.selectType == ESelectType.Troop)
-            {
-                TriggerTroop(entity as Troop);
-            }
-            else {
-                TriggerBuilding(entity as Building);
-            }
-        }
-
+        #region attack 
+        /******** 被攻击**************/
         private void OnBeAttackByBuilding() {
 
         }
@@ -225,173 +343,101 @@ namespace RTSSanGuo
         {
 
         }
-        //Trigger并不会改变目标
-        private void TriggerTroop(Troop troop) {
-            if (troop.ParentFaction == this.ParentFaction)
-                return;
-            else
-                CheckAutoNearAttackTroop(troop);
-        }
 
-        private void TriggerBuilding(Building building)
-        {
-            if (building.ParentFaction == this.ParentFaction)
-                return;
-            else
-                CheckAutoNearAttackBuilding(building);
-        }
-
-
-        public float nearAttackFrequence=2f;
-        public float lastNearStartAttackTime=0f;//上一次attack 开始时间
-        public float nearAttackCheckTime=0.2f; //attack 检测持续时间，建议设置比较小 10帧
-        public List<Troop> canAttackTroopList = new List<Troop>();
-        public List<Building> canAttackBuildingList = new List<Building>();
-        private void CheckAutoNearAttackTroop(Troop troop) {
-            if (canAttackTroopList.Contains(troop))
-                return;
-            float time = Time.timeSinceLevelLoad;
-            if (time < lastNearStartAttackTime + nearAttackCheckTime && time>lastNearStartAttackTime)
-            {
-                canAttackTroopList.Add(troop);
-            }
-        }
-        private void CheckAutoNearAttackBuilding(Building building)
-        {
-            if (canAttackBuildingList.Contains(building))
-                return;
-            float time = Time.timeSinceLevelLoad;
-            if (time < lastNearStartAttackTime + nearAttackCheckTime&& time>lastNearStartAttackTime) {
-                canAttackBuildingList.Add(building);
-            }
-        }
-
+        /******** 自动攻击操作**************/
+        private float lastAutoAttackStartTime=0f;//上一次attack 开始时间      
         public bool multiAttack = false;
-        private void DoAutoNearAttack() {
+        public List<Troop> CanAutoAttackTroopList {
+            get {
+                List<Troop> list = new List<Troop>();
+                foreach (Troop troop in interActionCheck.list_Intertroop) {
+                    if (troop.ParentFaction != ParentFaction)
+                        list.Add(troop);
+                }
+                return list;
+            }
+        }
+        public List<Building> CanAutoAttackBuildingList
+        {
+            get
+            {
+                List<Building> list = new List<Building>();
+                foreach (Building troop in interActionCheck.list_InterBuilding)
+                {
+                    if (troop.ParentFaction != ParentFaction)
+                        list.Add(troop);
+                }
+                return list;
+            }
+        }
+        private void DoAutoAttack() {
             //只能攻击一个对象
             if (!multiAttack)
             {
-                if (canAttackTroopList.Count > 0)
+                if (CanAutoAttackTroopList.Count > 0)
                 {
-                    if (canAttackTroopList.Contains(targetTroop) && targetType == ETroopTargetType.AttackTroop)
-                        NearAttackTroop(targetTroop);
+                    if (CanAutoAttackTroopList.Contains(targetTroop) && targetType == ETroopTargetType.AttackTroop)
+                        DoAttackTroop(targetTroop);
                     else
-                        NearAttackTroop(canAttackTroopList[0]); //随机挑选一个最近的，并且不改变目标
+                        DoAttackTroop(CanAutoAttackTroopList[0]); //随机挑选一个最近的，并且不改变目标
                 }
-                else if (canAttackBuildingList.Count > 0)
+                else if (CanAutoAttackBuildingList.Count > 0)
                 {
-                    if (canAttackBuildingList.Contains(targetBuilding) && targetType == ETroopTargetType.AttackBuilding)
-                        NearAttackBuilding(targetBuilding);
+                    if (CanAutoAttackBuildingList.Contains(targetBuilding) && targetType == ETroopTargetType.AttackBuilding)
+                        DoAttackBuilding(targetBuilding);
                     else
-                        NearAttackBuilding(canAttackBuildingList[0]); //随机挑选一个最近的，并且不改变目标
+                        DoAttackBuilding(CanAutoAttackBuildingList[0]); //随机挑选一个最近的，并且不改变目标
                 }
 
             }
             else {
-                foreach (Building building in canAttackBuildingList) {
-                    NearAttackBuilding(building);
+                foreach (Building building in CanAutoAttackBuildingList) {
+                    DoAttackBuilding(building);
                 }
-                foreach (Troop troop in canAttackTroopList) {
-                    NearAttackTroop(troop);
+                foreach (Troop troop in CanAutoAttackTroopList) {
+                    DoAttackTroop(troop);
                 }
             }
-            canAttackBuildingList.Clear();
-            canAttackTroopList.Clear();
+            CanAutoAttackBuildingList.Clear();
+            CanAutoAttackTroopList.Clear();
        }
 
 
-        //NearAttack 和remote Attack 同时只能有一个
+        /******** 自动图形音效操作**************/
         public Transform followFxParent; //
         public GameObject curFollowFx;//
         public Transform  remoteBulletStartPoint;
         public GameObject remoteBulletObj;
-        public  void NearAttackTroop(Troop tarTroop) {
+        public  void DoAttackTroop(Troop tarTroop) {
             float damage = this.Atk * (this.Atk / tarTroop.Def);  //this.atk / troop.def 伤害吸收率
             tarTroop.CurHP = tarTroop.CurHP -(int) damage;
             //tarTroop.NearAttackTroop(this); 没有反击，不然就是一对多
         }
-        public void NearAttackBuilding(Building tarBuilding)
+        public void DoAttackBuilding(Building tarBuilding)
         {
             float damage = this.Atk * (this.Atk / tarBuilding.Def);  //this.atk / troop.def 伤害吸收率
             tarBuilding.CurHP = tarBuilding.CurHP - (int)damage;
             tarBuilding.DefAttackTroop(this);//反击
         }
 
-        //改一下，远程武器近战也是射箭，无所谓近战还是远程
-        //把那个interAction设置更大范围
-        private void DoAutoRemoteAttack() {
-            List<Building> canRemoteAttackBuildingList = new List<Building>();
-            foreach (KeyValuePair<int, CityBuilding> pair in EntityMgr.Instacne.dic_City)
-            {
-                 
-
-            }
+        #endregion
 
 
-            if (!multiAttack)
-            {
-                if (canAttackTroopList.Count > 0)
-                {
-                    if (canAttackTroopList.Contains(targetTroop) && targetType == ETroopTargetType.AttackTroop)
-                        NearAttackTroop(targetTroop);
-                    else
-                        NearAttackTroop(canAttackTroopList[0]); //随机挑选一个最近的，并且不改变目标
-                }
-                else if (canAttackBuildingList.Count > 0)
-                {
-                    if (canAttackBuildingList.Contains(targetBuilding) && targetType == ETroopTargetType.AttackBuilding)
-                        NearAttackBuilding(targetBuilding);
-                    else
-                        NearAttackBuilding(canAttackBuildingList[0]); //随机挑选一个最近的，并且不改变目标
-                }
 
-            }
-            else
-            {
-                foreach (Building building in canAttackBuildingList)
-                {
-                    NearAttackBuilding(building);
-                }
-                foreach (Troop troop in canAttackTroopList)
-                {
-                    NearAttackTroop(troop);
-                }
-            }
-
-
-            //遍历还是碰撞检测，实际上遍历更快
-            if (targetType == ETroopTargetType.AttackBuilding&& targetBuilding!=null) {
-                RemoteAttackBuilding(targetBuilding);
-            }
-            else  if (targetType == ETroopTargetType.AttackTroop && targetTroop != null)
-            {
-                RemoteAttackTroop(targetTroop);
-            }
-
-           
-        }
-
-        private void RemoteAttackTroop(Troop troop)
-        {
-
-        }
-        private void RemoteAttackBuilding(Building building)
-        {
-
-        }
-
-        
-
+        private float runningtime =0f ;
         private void Update()
         {
-            float time = Time.timeSinceLevelLoad;
-            if (time > lastNearStartAttackTime + nearAttackFrequence)//过了一个周期
-            {
-                lastNearStartAttackTime = time;                
-                DoAutoNearAttack(); //自动近战攻击
+            if (GameMgr.Instacne.state != EGameState.Running) {
+                agent.isStopped = true;
+                return;
             }
-
-           
+            agent.isStopped = false;
+            runningtime += Time.deltaTime;
+            if (runningtime > lastAutoAttackStartTime + AtkFrequency)//过了一个周期
+            {
+                lastAutoAttackStartTime = runningtime;                
+                DoAutoAttack(); //自动近战攻击
+            }
             UpdateAI(); //主要是设定目标
             UpdateSkillAI(); //技能释放
 
@@ -474,14 +520,12 @@ namespace RTSSanGuo
                     agent.SetDestination(targetPoint);
                 }
 
-            }
-            
+            }            
         }
+        
 
-
-
-
-        public void MoveToPoint(Vector3 point,float differ=0.5f) {
+        #region commmad
+        public void CommandMoveToPoint(Vector3 point,float differ=0.5f) {
             if (point.y < 1) point.y = 1f;
             targetType = ETroopTargetType.MoveToPoint;
             targetPoint = point;
@@ -493,13 +537,13 @@ namespace RTSSanGuo
 
         }        
         //这个必须使用update操作，并非一次性
-        public void AttackTroop(Troop troop) {
+        public void CommadAttackTroop(Troop troop) {
             targetType = ETroopTargetType.AttackTroop;
             targetBuilding = null;
             targetTroop = troop;
         }
 
-        public void FollowTroop(Troop troop, float differ = 0.5f)
+        public void CommandFollowTroop(Troop troop, float differ = 0.5f)
         {
             targetType = ETroopTargetType.FollowTroop;
             targetBuilding = null;
@@ -507,21 +551,21 @@ namespace RTSSanGuo
             moveToDiff = differ;
         }
 
-        public void AttackBuilding(Building building) {
+        public void CommandAttackBuilding(Building building) {
             targetType = ETroopTargetType.AttackBuilding;
             targetBuilding = building;
             targetTroop = null;
         }
 
-        public void MoveInToBuilding(Building building , float differ = 0.5f)
+        public void CommandMoveInToBuilding(Building building , float differ = 0.5f)
         {
             targetType = ETroopTargetType.MoveIntoBuilding;
             targetBuilding = building;
             targetTroop = null;
             moveToDiff = differ;//小于这个距离直接enter
         }
+        #endregion
 
-       
 
         private void UpdateAI() {
 

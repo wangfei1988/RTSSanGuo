@@ -1,1 +1,4 @@
-﻿
+##id,,,,,,,,,,,,,,,,,,,5--s ABCD,,,,
+##id,alias,shordesc,fulldesc,firstname,secondname,thirdname,bornyear,bornmonth,bornday,isfree,isprison,canhire,curleftexp,tong,wu,zhi,zhen,mei,level_bu,level_qi,level_gong,level_shui,level_gongcheng
+1,liubei,,,Liu,Bei,,1,1,1,FALSE,FALSE,TRUE,1,100,100,100,100,100,5,5,5,5,5
+2,caocao,,,Cao,Cao,,1,1,1,FALSE,FALSE,TRUE,1,100,100,100,100,100,5,5,5,5,5

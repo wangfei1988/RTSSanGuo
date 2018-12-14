@@ -66,18 +66,18 @@ namespace RTSSanGuo
                     if (entity.selectType == ESelectType.Troop) {
                         Troop targetTroop = entity as Troop;
                         if (targetTroop.CanBeAttack)
-                            troop.AttackTroop(targetTroop);
+                            troop.CommadAttackTroop(targetTroop);
                         else
-                            troop.FollowTroop(targetTroop);
+                            troop.CommandFollowTroop(targetTroop);
 
                     } else if (entity.selectType == ESelectType.Building) {
                         Building targetBuilding = entity as Building;
                         if (targetBuilding.CanBeAttack)
-                            troop.AttackBuilding(targetBuilding);
+                            troop.CommandAttackBuilding(targetBuilding);
                         else if (targetBuilding.CanTroopMoveInto)
-                            troop.MoveInToBuilding(targetBuilding);
+                            troop.CommandMoveInToBuilding(targetBuilding);
                         else
-                            troop.MoveToPoint(targetBuilding.transform.position);
+                            troop.CommandMoveToPoint(targetBuilding.transform.position);
                     }
                 }
             }
@@ -91,7 +91,7 @@ namespace RTSSanGuo
                 if (troop != null)
                 {
                    // Debug.Log("troop move to" + troop.entityname + point.ToString());
-                    troop.MoveToPoint(point);
+                    troop.CommandMoveToPoint(point);
                 }
             }
           

@@ -22,6 +22,7 @@ namespace RTSSanGuo
         public Transform sectionEntityParent;
         public Transform cityEntityParent;
         public Transform troopEntityParent;
+        public Transform personEntityParent;
 
 
 #if TestSanGuo
@@ -55,47 +56,48 @@ namespace RTSSanGuo
 #endif
 
 
-        //没几个，就算啰嗦一点先实现吧
-        private int GetValidTroopID() {
-            for (int i = 1; i < 100000; i++) {
-                if (!dic_Troop.ContainsKey(i))
-                    return i;
-            }
-            Debug.LogError("Too Many Entity");
-            return -1;
-        }
-
+        
+        
+        public Dictionary<int, Person> dic_Person = new Dictionary<int, Person>();
         public Dictionary<int, Troop> dic_Troop = new Dictionary<int, Troop>();        
         public Dictionary<int, CityBuilding> dic_City = new Dictionary<int, CityBuilding>();
         public Dictionary<int, Section> dic_Section = new Dictionary<int, Section>();
         public Dictionary<int, Faction> dic_Faction = new Dictionary<int, Faction>();
         //public Dictionary<int, Troop> dic_Troop = new Dictionary<int, Troop>();
 
-        
 
 
+        #region Play过程数据改变
         //增删统一放到EntityManager 不能其他位只删除。 
         public void RemoveTroop(int id) {
             Troop troop= dic_Troop[id];
             HudMgr.Instacne.DelHudTroop(id); //先移除Hud
-            //先移除父对象对他的引用
-            if (troop.ParentCity && troop.ParentCity.dic_troop.ContainsKey(id))
-                troop.ParentCity.dic_troop.Remove(id);
-            //再移除子对象对他的引用
+            //step1 先移除数据对象 父对象对他的引用
+            if (troop.ParentCity && troop.ParentCity.IDList_Troop.Contains(id))
+                troop.ParentCity.IDList_Troop.Remove(id);
+            //再移除（处理）他的子对象
 
-            dic_Troop.Remove(id); //再移除id         
-                 
+            //step2 销毁数据对象  数据对象和entity对象id是一样的
+            DataMgr.Instacne.dic_Troop.Remove(id);
+            //step3 销毁entiyt对象
+            dic_Troop.Remove(id); //再移除id                          
+            //step4 销毁图形
             Destroy(troop.gameObject); //再销毁对象          
         }
 
         //主要操作的还是Troop 
         //必须先把数据data准备好，然后才是Entity
-        public Troop AddTroop(DTroop dtroop, Vector3 pos)
+        public void  AddTroop(int troopTypeid,DCityBuilding dcityfrom, Vector3 bornpos ,Vector3 movetopos ,int soldiernum ,int personid1 ,int personid2,int personid3)
         {
-            int prefabid = dtroop.id_trooptype;
-            GameObject prefab = ResMgr.Instacne.dic_TroopPrefab[prefabid];
+           // step1 设置数据对象
+            DTroop dtroop = DataMgr.Instacne.AddNewTroopData(troopTypeid ,personid1,personid2,personid3);
+            dtroop.origsoldiernum = soldiernum;
+            dtroop.cursoldiernum = soldiernum;
+
+            //step2 生成gameobject 设置entity对象
+            GameObject prefab = ResMgr.Instacne.dic_TroopPrefab[troopTypeid];
             GameObject go = Instantiate(prefab) as GameObject;
-            go.transform.position = pos;
+            go.transform.position = bornpos;
             go.transform.SetParent(troopEntityParent, true); //这个设置不设置不影响坐标，因为troopEntityParent 本身就在原点
             Troop troop = go.GetComponent<Troop>();
             //需要建立Data对象  这里先忽略，直接使用prefab数据
@@ -104,15 +106,23 @@ namespace RTSSanGuo
             go.SetActive(true);
             HudMgr.Instacne.AddHudTroop(troop.ID);
 
-            return troop; //这里只负责返回，父子关系由调用者处理            
+            //step3 设置父子关系
+            //设置city 数据对象的子对象id
+            dcityfrom.idlist_troop.Add(dtroop.id);
+            //子对象设置父对象id
+            dtroop.parentid_city = dcityfrom.id;
+
+            troop.targetType = ETroopTargetType.MoveToPoint;
+            troop.CommandMoveToPoint(movetopos);           
         }
 
-        public Troop AddTroopFromData(int troopid, Vector3 pos)
-        {
-            return null;    
-        }
 
-        //City 不能new ，所以只能初始化数据.而且不能摧毁
+        #endregion
+
+
+
+        #region 数据加载
+        //City 不建议new ，建议直接固定在场景当中，位置也不会变，所以只能初始化数据.而且不能摧毁
         public void  InitAllCityData() {            
             CityBuilding[] cities = cityEntityParent.GetComponentsInChildren<CityBuilding>();
             foreach (CityBuilding city in cities) {
@@ -156,13 +166,31 @@ namespace RTSSanGuo
             GameObject go = new GameObject();
             go.transform.SetParent(factionEntityParent);
             Faction faction = go.AddComponent<Faction>();
-            faction.data = dfaction;
+            faction.Data = dfaction;
             dic_Faction.Add(faction.ID, faction);
             if (faction.ID == DataMgr.Instacne.selSaveData.id_playerFaction)
                 faction.isPlayer = true;
             return faction;
         }
 
+        public Person AddPersonFromData(int personid)
+        {
+            if (!DataMgr.Instacne.dic_Person.ContainsKey(personid))
+            {
+                LogTool.LogError("DataMgr not have id " + personid);
+                return null;
+            }
+            DPerson dfaction = DataMgr.Instacne.dic_Person[personid];
+            GameObject go = new GameObject("person_"+personid);
+            go.transform.SetParent(personEntityParent);
+            Person person = go.AddComponent<Person>();
+            person.Data = dfaction;
+            dic_Person.Add(person.ID, person);            
+            return person;
+        }
+
+
+        #endregion
 
     }
 }

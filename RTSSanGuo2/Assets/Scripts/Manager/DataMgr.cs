@@ -28,8 +28,9 @@ namespace RTSSanGuo
         public CSVFile troopTypeFile = null;
         public Dictionary<int, DTroopType> dic_TroopType = new Dictionary<int, DTroopType>();
 
-
-
+        private CSVFile personFile = null;
+        public Dictionary<int, DPerson> dic_Person = new Dictionary<int, DPerson>();
+        private CSVFile troopFile = null;
         public Dictionary<int, DTroop> dic_Troop = new Dictionary<int, DTroop>();
         private CSVFile cityFile = null;
         public Dictionary<int, DCityBuilding> dic_City = new Dictionary<int, DCityBuilding>();
@@ -39,31 +40,13 @@ namespace RTSSanGuo
         public Dictionary<int, DFaction> dic_Faction = new Dictionary<int, DFaction>();
 
         public bool hasInitAllData = false;// 初始化基础数据
-        public IEnumerator LoadEsscentialData() {
+        private IEnumerator LoadEsscentialData() {
 
             //首先加载不可变更数据
-            string filePath = PathTool.DataFileRootFold + "/common/troopType.csv";
-            troopTypeFile = new CSVFile();
-            troopTypeFile.ReadCsv(filePath);
-            dic_TroopType.Clear();
-            foreach (string[] arr in troopTypeFile.valueLines)
-            {
-                if (arr.Length != 9) continue;
-                DTroopType troopType = new DTroopType();
-                troopType.id = int.Parse(arr[0]);
-                troopType.alias = arr[1];
-                troopType.shortdesc = arr[2];
-                troopType.fulldesc = arr[3];
-                troopType.baseatk = int.Parse(arr[4]);
-                troopType.basedef = int.Parse(arr[5]);
-                troopType.baseremoteatkrange = int.Parse(arr[6]);
-                troopType.basemovespeed = float.Parse(arr[7]);
-                troopType.resid = int.Parse(arr[8]);
-                dic_TroopType.Add(troopType.id, troopType);
-            }
+            LoadTroopType();
             yield return null;
 
-            filePath = PathTool.DataFileRootFold + "/save/save.csv";
+            string filePath = PathTool.DataFileRootFold + "/save/save.csv";
             saveFile = new CSVFile();
             saveFile.ReadCsv(filePath);
             dic_Save.Clear();
@@ -108,6 +91,28 @@ namespace RTSSanGuo
             yield return null;
             hasInitAllData = true;
         }
+        private void LoadTroopType (){
+            string filePath = PathTool.DataFileRootFold + "/common/trooptype.csv";
+            troopTypeFile = new CSVFile();
+            troopTypeFile.ReadCsv(filePath);
+            dic_TroopType.Clear();
+            foreach (string[] arr in troopTypeFile.valueLines)
+            {
+                if (arr.Length != 10) continue;
+                DTroopType troopType = new DTroopType();
+                troopType.id = int.Parse(arr[0]);
+                troopType.alias = arr[1];
+                troopType.shortdesc = arr[2];
+                troopType.fulldesc = arr[3];
+                troopType.baseatk = int.Parse(arr[4]);
+                troopType.basedef = int.Parse(arr[5]);
+                troopType.baseremoteatkrange = int.Parse(arr[6]);
+                troopType.basemovespeed = float.Parse(arr[7]);
+                troopType.baseatkfrequency = float.Parse(arr[8]);
+                troopType.resid = int.Parse(arr[9]);
+                dic_TroopType.Add(troopType.id, troopType);
+            }
+        }
 
         public int loadPercent = 0;
         public bool dataPrepared = false;
@@ -131,6 +136,9 @@ namespace RTSSanGuo
         //Data 直接保存的是一级子对象id  以及反向推算出父对象id 
         // 子对象的子对象 以及父对象的父对象没有记录，只能通过间接获取
         private IEnumerator LoadSaveData(string fold) {
+            LoadPerson(fold);
+            loadPercent = 5;
+            yield return null;
             LoadTroop(fold);
             loadPercent = 5;
             yield return null;
@@ -149,12 +157,53 @@ namespace RTSSanGuo
             yield return null;
         }
 
+        private void LoadPerson(string fold)
+        {
+            string filePath = fold + "/person.csv";
+            personFile = new CSVFile();
+            personFile.ReadCsv(filePath);
+            dic_Person.Clear();
+            foreach (string[] arr in cityFile.valueLines)
+            {
+                if (arr.Length != 16)
+                {
+                    LogTool.LogError("city arr.length" + arr.Length);
+                    continue;
+                }
+                DPerson person = new DPerson();
+                person.id = int.Parse(arr[0]);
+                person.alias = arr[1];
+                person.shortdesc = arr[2];
+                person.fulldesc = arr[3];
+                person.firstname = arr[4];
+                person.secondname = arr[5];
+                person.thirdname = arr[6];
+                person.bornyear = int.Parse(arr[7]);
+                person.bornmonth = int.Parse(arr[8]);
+                person.bornday = int.Parse(arr[9]);
+                person.isfreeperson = bool.Parse(arr[10]);
+                person.isprison = bool.Parse(arr[11]);
+                person.canhire = bool.Parse(arr[12]);
+                person.curleftexp = int.Parse(arr[13]);
 
+                person.tong = int.Parse(arr[14]);
+                person.wu = int.Parse(arr[15]);
+                person.zhi = int.Parse(arr[16]);
+                person.zhen = int.Parse(arr[17]);
+                person.mei = int.Parse(arr[18]);
+
+                person.level_bubing = int.Parse(arr[19]);
+                person.level_qibing = int.Parse(arr[20]);
+                person.level_gongbing = int.Parse(arr[21]);
+                person.level_shuibing = int.Parse(arr[22]);
+                person.level_gongcheng = int.Parse(arr[23]);
+                dic_Person.Add(person.id, person);
+                EntityMgr.Instacne.AddPersonFromData(person.id);
+            }
+        }
         private void LoadTroop(string fold) {
 
         }
-
-
         private void LoadCity(string fold )
         {
             string filePath = fold + "/city.csv";
@@ -263,7 +312,7 @@ namespace RTSSanGuo
         }
 
 
-        public DTroop AddNewTroopData(int trooptypeid) {
+        public DTroop AddNewTroopData(int trooptypeid ,int personid1,int personid2,int personid3) {
             if (dic_TroopType.ContainsKey(trooptypeid))
             {
                 DTroop troop = new DTroop();
@@ -275,6 +324,9 @@ namespace RTSSanGuo
                 }
                 troop.id = id;
                 troop.id_trooptype = trooptypeid;
+                troop.id_person1 = personid1;
+                troop.id_person2 = personid2;
+                troop.id_person3 = personid3;
                 dic_Troop.Add(id, troop);
                 return troop;
             }

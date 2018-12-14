@@ -12,40 +12,30 @@ namespace RTSSanGuo
     public class Building : SelectAbleEntity
     {
 
-
-        public bool  CanDefAttack{
+        /******其他Wrap******/
+        public virtual bool  CanDefAttack{
             get { return type == EBuildingType.City; } //city类型可以这么做 pbuilding  wbuilding troop 都不行
         }
-
-
-
+        public virtual  bool CanTroopMoveInto
+        {
+            get { return type == EBuildingType.City;}
+        }
         //每一种building都要单独写，因为行为都不一样。这个和Troop还不一样。Troop 行为都是一样的，move attack skill
+
+
+
         public EBuildingType type = EBuildingType.City;
-
-
-        //父 所有层级
+        //父 所有层级     
         
-
-          
-
         public Action onHpChange;
         public virtual void DefAttackTroop(Troop troop) //反击
-        {
-            // float damage = this.atk * (this.atk / troop.def);  //this.atk / troop.def 伤害吸收率
-            // troop.hp = troop.hp - (int)damage;
+        {            
             Debug.Log("must use child");
         }
 
 
-        public bool CanTroopMoveInto {
-            get {
-                if (type == EBuildingType.City)
-                    return true;
-                else
-                    return false;
-            }           
-        }
-        //在附近没有敌方单位的时候可以，有的话，直接走到敌方单位
+       
+        //在附近没有敌方单位的时候可以，有的话，直接走到敌方单位.
         public virtual void  SetTroopRollyPoint(Vector3 point)
         {
 

@@ -8,27 +8,9 @@ namespace RTSSanGuo
     public enum ESelectType {Building=1, Troop}
     public  class SelectAbleEntity:EntityBase
     {
-        //public bool playerControl;//初始化就赋值，不用每次都去判断。 和Faction 有关
-        //只有PlayerFaction才可以被选中，其他的只能hover
-        public virtual bool CanBeAttack {
-            get {
-                return false; //非玩家阵营都可以被Attack
-            }
-        }
-        
 
-        public virtual bool CanBeSelect
-        {
-            get
-            {
-                return false; //非玩家阵营都可以被Attack
-            }
-        }
-           
-
-        public virtual Faction ParentFaction { get { return null; } }
-        public virtual Section ParentSection { get { return null; } }
-
+        #region wrap
+        /***************wrap basic本身 ************/
         public virtual int CurHP
         {
             get
@@ -50,17 +32,47 @@ namespace RTSSanGuo
                 return 0;
             }
         }
-
-    
         public virtual int Atk
         {
             get { Debug.LogError("Must override in child "); return 100; }
         }
         public virtual int Def
         {
-            get { Debug.LogError("Must override in child ");  return 100; }
+            get { Debug.LogError("Must override in child "); return 100; }
         }
+        //攻击范围和图形有关，直接在prefab里面
 
+        /******一级父对象（id在子对象有，但是是反向推算） +多级父对象（通过级联获取）******/
+        public virtual Faction ParentFaction { get { LogTool.LogError("must override in child ");  return null; } }
+        public virtual Section ParentSection { get { LogTool.LogError("must override in child ");  return null; } }
+
+        /******其他Wrap******/      
+       
+        public virtual bool IsPlayer
+        {
+            get
+            {
+                LogTool.LogError("must override in child ");
+                return false; //非玩家阵营都可以被Attack
+            }
+        }
+        public virtual bool CanBeAttack {
+            get {
+                LogTool.LogError("must override in child ");
+                return false; //非玩家阵营都可以被Attack
+            }
+        }
+        //只有PlayerFaction才可以被选中，其他的只能hover
+        public virtual bool CanBeSelect
+        {
+            get
+            {
+                LogTool.LogError("must override in child ");
+                return false; //非玩家阵营都可以被Attack
+            }
+        }       
+
+        #endregion
         public float hudXOffset;
         public float hudYOffset;
 
@@ -78,7 +90,6 @@ namespace RTSSanGuo
         public virtual void UnSelect() {
            ////// Debug.LogError("Must Over Ride in child");
         }
-
         public Action<SelectAbleEntity> OnHover;
         public virtual void Hover()
         {

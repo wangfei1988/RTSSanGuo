@@ -11,7 +11,8 @@ namespace RTSSanGuo
         public DSection data;
 
         #region wrap data
-        //本身
+
+        /*******wrap basic本身 ************/        
         public override int ID
         {
             get { return data.id; }
@@ -31,10 +32,26 @@ namespace RTSSanGuo
             get { return data.fulldesc; }
         }
 
-        //一级子对象（记录在data）+多级子对象
+        /******一级子对象（id直接记录在data）+ 多级子对象（通过级联获取）******/
+        public Dictionary<int, CityBuilding> Dic_City
+        {
+            get
+            {
+                if (!DataMgr.Instacne.dataPrepared)
+                    LogTool.LogError("data not prepared");
+                Dictionary<int, CityBuilding> dic = new Dictionary<int, CityBuilding>();
+                foreach (int cityid in data.idlist_city)
+                {
+                    if (EntityMgr.Instacne.dic_City.ContainsKey(cityid))
+                    {
+                        dic.Add(cityid, EntityMgr.Instacne.dic_City[cityid]);
+                    }
+                }
+                return dic;
+            }
+        }
 
-
-        //一级父对象（没有记录在data，但是加载data时反向推算） +多级父对象   删除时需要删除本身及一级父对象的子对象索引
+        /******一级父对象（id在子对象有，但是是反向推算） +多级父对象（通过级联获取）******/
         public Faction ParentFaction {
             get {
                 if (!DataMgr.Instacne.dataPrepared)
@@ -52,14 +69,13 @@ namespace RTSSanGuo
             }
         }
 
+        /******其他Wrap******/
+
         #endregion
-        public Person leaderPerson;
-        //public Color sectionColor;
+        //初始化设置的
         public bool isPlayer;
 
-        //子
-        public Dictionary<int, CityBuilding> dic_section = new Dictionary<int, CityBuilding>();
-        //父
+        
         
     }
 }

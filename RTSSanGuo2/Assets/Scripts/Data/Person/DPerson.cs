@@ -15,10 +15,11 @@ namespace RTSSanGuo
         public string thirdname;
         public int bornyear;
         public int bornmonth;
-        public int borndate; //未成年之前 不会四处移动，而且是free people
+        public int bornday; //未成年之前 不会四处移动，而且是free people 成年统一18 
         public bool isfreeperson;//没有任何faction 雇佣
+        public bool isprison;// 
         public bool canhire; //蛮族不可以
-        public int curleftexp; //当前剩下exp
+        public int curleftexp; //当前剩下exp  只操作主角
 
         public int tong;
         public int wu;
@@ -35,7 +36,7 @@ namespace RTSSanGuo
        // public List<int> idlist_ 太多内容了，先展示取消这一快
 
        
-        public int parentid_city;//一级父类---不是保存，而是逆向计算.这里有三个一级父类。 其中parentid_troop  parentid_pbuilding互斥
+        public int parentid_city;//三个一级父类---不是保存，而是逆向计算.这里有三个一级父类。 其中parentid_troop  parentid_pbuilding互斥
         public int parentid_troop;
         public int parentid_pbuilding;
 
